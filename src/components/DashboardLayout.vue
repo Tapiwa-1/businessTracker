@@ -11,17 +11,21 @@
       </div>
 
       <nav class="mt-10">
-        <a class="flex items-center px-6 py-2 mt-4 text-gray-100 bg-gray-700 bg-opacity-25" href="#">
+        <router-link to="/" class="flex items-center px-6 py-2 mt-4 text-gray-500 hover:bg-gray-700 hover:bg-opacity-25 hover:text-gray-100" active-class="text-gray-100 bg-gray-700 bg-opacity-25">
           <span class="mx-3">Dashboard</span>
-        </a>
+        </router-link>
 
-        <a class="flex items-center px-6 py-2 mt-4 text-gray-500 hover:bg-gray-700 hover:bg-opacity-25 hover:text-gray-100" href="#">
+        <router-link to="/transactions" class="flex items-center px-6 py-2 mt-4 text-gray-500 hover:bg-gray-700 hover:bg-opacity-25 hover:text-gray-100" active-class="text-gray-100 bg-gray-700 bg-opacity-25">
           <span class="mx-3">Transactions</span>
-        </a>
+        </router-link>
 
-        <a class="flex items-center px-6 py-2 mt-4 text-gray-500 hover:bg-gray-700 hover:bg-opacity-25 hover:text-gray-100" href="#">
+        <router-link to="/reports" class="flex items-center px-6 py-2 mt-4 text-gray-500 hover:bg-gray-700 hover:bg-opacity-25 hover:text-gray-100" active-class="text-gray-100 bg-gray-700 bg-opacity-25">
           <span class="mx-3">Reports</span>
-        </a>
+        </router-link>
+
+        <button @click="logout" class="flex items-center w-full px-6 py-2 mt-4 text-gray-500 hover:bg-gray-700 hover:bg-opacity-25 hover:text-gray-100 focus:outline-none">
+          <span class="mx-3">Logout</span>
+        </button>
       </nav>
     </div>
 
@@ -34,13 +38,13 @@
               <path d="M4 6H20M4 12H20M4 18H11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </button>
-          <h2 class="text-xl font-medium text-gray-800 lg:ml-0 ml-4">Dashboard</h2>
+          <h2 class="text-xl font-medium text-gray-800 lg:ml-0 ml-4">Business Dashboard</h2>
         </div>
 
         <div class="flex items-center">
           <div class="relative">
             <button class="flex items-center text-gray-500 hover:text-gray-600 focus:outline-none">
-              <span class="ml-2 text-sm font-semibold">User</span>
+              <span class="ml-2 text-sm font-semibold">{{ userEmail }}</span>
             </button>
           </div>
         </div>
@@ -48,24 +52,6 @@
 
       <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100">
         <div class="container px-6 py-8 mx-auto">
-          <div class="grid grid-cols-1 gap-6 mb-6 lg:grid-cols-4">
-            <div class="w-full px-4 py-5 bg-white rounded-lg shadow">
-              <div class="text-sm font-medium text-gray-500 truncate">Total Income</div>
-              <div class="mt-1 text-3xl font-semibold text-gray-900">${{ totalIncome }}</div>
-            </div>
-            <div class="w-full px-4 py-5 bg-white rounded-lg shadow">
-              <div class="text-sm font-medium text-gray-500 truncate">Total Expenses</div>
-              <div class="mt-1 text-3xl font-semibold text-gray-900">${{ totalExpenses }}</div>
-            </div>
-            <div class="w-full px-4 py-5 bg-white rounded-lg shadow">
-              <div class="text-sm font-medium text-gray-500 truncate">Profit</div>
-              <div class="mt-1 text-3xl font-semibold text-gray-900">${{ profit }}</div>
-            </div>
-             <div class="w-full px-4 py-5 rounded-lg shadow" :class="profitClass">
-              <div class="text-sm font-medium text-white truncate">Current Profit</div>
-              <div class="mt-1 text-3xl font-semibold text-white">${{ profit }}</div>
-            </div>
-          </div>
           <slot />
         </div>
       </main>
@@ -75,15 +61,16 @@
 
 <script setup>
 import { ref, computed } from 'vue';
+import { useRouter } from 'vue-router';
 import { store } from '../store.js';
 
 const sidebarOpen = ref(false);
+const router = useRouter();
 
-const totalIncome = computed(() => store.income.reduce((acc, income) => acc + income.amount, 0));
-const totalExpenses = computed(() => store.expenses.reduce((acc, expense) => acc + expense.amount, 0));
-const profit = computed(() => totalIncome.value - totalExpenses.value);
+const userEmail = computed(() => store.user?.email || 'User');
 
-const profitClass = computed(() => {
-  return profit.value >= 0 ? 'bg-green-500' : 'bg-red-500';
-});
+const logout = () => {
+  store.logout();
+  router.push('/login');
+};
 </script>

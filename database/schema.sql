@@ -1,0 +1,23 @@
+CREATE DATABASE IF NOT EXISTS business_tracker;
+
+USE business_tracker;
+
+CREATE TABLE IF NOT EXISTS users (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  email VARCHAR(255) NOT NULL UNIQUE,
+  password VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS transactions (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  type ENUM('income', 'expense') NOT NULL,
+  date DATE NOT NULL,
+  amount DECIMAL(10, 2) NOT NULL,
+  source VARCHAR(255),
+  name VARCHAR(255),
+  comments TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
