@@ -7,12 +7,14 @@ import Transactions from '../views/Transactions.vue';
 import Reports from '../views/Reports.vue';
 import Settings from '../views/Settings.vue';
 import Inventory from '../views/Inventory.vue';
+import Bookings from '../views/Bookings.vue';
 
 const routes = [
   { path: '/login', component: Login, meta: { guest: true } },
   { path: '/register', component: Register, meta: { guest: true } },
   { path: '/', component: Dashboard, meta: { requiresAuth: true } },
   { path: '/transactions', component: Transactions, meta: { requiresAuth: true } },
+  { path: '/bookings', component: Bookings, meta: { requiresAuth: true } },
   { path: '/reports', component: Reports, meta: { requiresAuth: true } },
   { path: '/inventory', component: Inventory, meta: { requiresAuth: true } },
   { path: '/settings', component: Settings, meta: { requiresAuth: true } },
