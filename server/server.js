@@ -5,6 +5,7 @@ import authRoutes from './routes/auth.js';
 import transactionRoutes from './routes/transactions.js';
 import reportRoutes from './routes/reports.js';
 import equipmentRoutes from './routes/equipmentRoutes.js';
+import bookingRoutes from './routes/bookingRoutes.js';
 import { initializeDb } from './config/db.js';
 
 dotenv.config();
@@ -19,6 +20,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/equipment', equipmentRoutes);
+app.use('/api/bookings', bookingRoutes);
 
 initializeDb().then(() => {
   app.listen(PORT, () => {

@@ -56,6 +56,29 @@ async function initializeDb() {
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     );
+
+    CREATE TABLE IF NOT EXISTS bookings (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      client_name TEXT NOT NULL,
+      client_phone TEXT,
+      event_type TEXT,
+      start_time DATETIME NOT NULL,
+      end_time DATETIME NOT NULL,
+      location TEXT,
+      status TEXT CHECK(status IN ('Pending', 'Confirmed', 'Completed', 'Cancelled')) DEFAULT 'Pending',
+      notes TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+
+    CREATE TABLE IF NOT EXISTS booking_equipment (
+      booking_id INTEGER NOT NULL,
+      equipment_id INTEGER NOT NULL,
+      PRIMARY KEY (booking_id, equipment_id),
+      FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE CASCADE,
+      FOREIGN KEY (equipment_id) REFERENCES equipment(id) ON DELETE CASCADE
+    );
   `);
 
   console.log('SQLite database initialized');
