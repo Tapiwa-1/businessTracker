@@ -3,45 +3,45 @@ import db from '../config/db.js';
 export const getDashboardData = async (req, res) => {
   try {
     const userId = req.user.id;
+    const { startDate, endDate } = req.query;
 
-    // Overall totals
-    const incomeResult = await db.get('SELECT SUM(amount) as total FROM transactions WHERE user_id = ? AND type = "income"', [userId]);
-    const expenseResult = await db.get('SELECT SUM(amount) as total FROM transactions WHERE user_id = ? AND type = "expense"', [userId]);
+    let dateFilter = '';
+    const params = [userId];
+
+    if (startDate && endDate) {
+      dateFilter = ' AND date BETWEEN ? AND ?';
+      params.push(startDate, endDate);
+    }
+
+    // Filtered totals
+    const incomeResult = await db.get(`SELECT SUM(amount) as total FROM transactions WHERE user_id = ? AND type = "income" ${dateFilter}`, params);
+    const expenseResult = await db.get(`SELECT SUM(amount) as total FROM transactions WHERE user_id = ? AND type = "expense" ${dateFilter}`, params);
 
     const totalIncome = incomeResult.total || 0;
     const totalExpenses = expenseResult.total || 0;
     const profit = totalIncome - totalExpenses;
 
-    // Monthly performance (current month)
-    const now = new Date();
-    // SQLite dates are stored as strings (YYYY-MM-DD usually from our frontend),
-    // but the `addTransaction` uses Joi iso validation, so it comes as a Date object or ISO string.
-    // In `transactionController` we insert whatever `req.body.date` is. The frontend sends YYYY-MM-DD from <input type="date">.
-    // So we can compare string directly if format is ISO-8601 (YYYY-MM-DD).
-    // Let's ensure we compare against YYYY-MM-01.
+    // Chart Data (Daily Aggregates)
+    // We group by date. Since SQLite stores dates as strings YYYY-MM-DD, we can group directly.
+    const chartQuery = `
+      SELECT date,
+             SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) as income,
+             SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) as expense
+      FROM transactions
+      WHERE user_id = ? ${dateFilter}
+      GROUP BY date
+      ORDER BY date ASC
+    `;
 
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    // Format to YYYY-MM-DD
-    const startOfMonthStr = startOfMonth.toISOString().split('T')[0];
-
-    const monthlyIncomeResult = await db.get('SELECT SUM(amount) as total FROM transactions WHERE user_id = ? AND type = "income" AND date >= ?', [userId, startOfMonthStr]);
-    const monthlyExpenseResult = await db.get('SELECT SUM(amount) as total FROM transactions WHERE user_id = ? AND type = "expense" AND date >= ?', [userId, startOfMonthStr]);
-
-    const monthlyIncome = monthlyIncomeResult.total || 0;
-    const monthlyExpenses = monthlyExpenseResult.total || 0;
-    const monthlyProfit = monthlyIncome - monthlyExpenses;
+    const chartData = await db.all(chartQuery, params);
 
     res.json({
-      overall: {
+      summary: {
         income: totalIncome,
         expenses: totalExpenses,
         profit
       },
-      monthly: {
-        income: monthlyIncome,
-        expenses: monthlyExpenses,
-        profit: monthlyProfit
-      }
+      chartData
     });
   } catch (err) {
     res.status(500).json({ error: err.message });

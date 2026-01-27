@@ -19,8 +19,8 @@ export const store = reactive({
   user: JSON.parse(localStorage.getItem('user')) || null,
   transactions: [],
   dashboardData: {
-    overall: { income: 0, expenses: 0, profit: 0 },
-    monthly: { income: 0, expenses: 0, profit: 0 },
+    summary: { income: 0, expenses: 0, profit: 0 },
+    chartData: []
   },
   authLoading: false,
   authErrors: {},
@@ -52,7 +52,6 @@ export const store = reactive({
       if (error.response && error.response.data && error.response.data.errors) {
         this.authErrors = error.response.data.errors;
       } else if (error.response && error.response.data && error.response.data.message) {
-         // Fallback for general message not attached to a field, maybe attach to 'email' or general
          this.authErrors = { general: [error.response.data.message] };
       }
       throw error;
@@ -89,7 +88,7 @@ export const store = reactive({
         this.token = null;
         this.user = null;
         this.transactions = [];
-        this.dashboardData = { overall: {}, monthly: {} };
+        this.dashboardData = { summary: { income: 0, expenses: 0, profit: 0 }, chartData: [] };
         localStorage.removeItem('token');
         localStorage.removeItem('user');
     }
@@ -140,9 +139,9 @@ export const store = reactive({
     }
   },
 
-  async fetchDashboardData() {
+  async fetchDashboardData(params = {}) {
     try {
-      const response = await api.get('/reports/dashboard');
+      const response = await api.get('/reports/dashboard', { params });
       this.dashboardData = response.data;
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
