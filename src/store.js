@@ -23,37 +23,81 @@ export const store = reactive({
     monthly: { income: 0, expenses: 0, profit: 0 },
   },
 
+  async fetchUser() {
+      if (!this.token) return;
+      try {
+          const response = await api.get('/auth/user');
+          this.user = response.data;
+          localStorage.setItem('user', JSON.stringify(this.user));
+      } catch (error) {
+          console.error('Failed to fetch user:', error);
+          if (error.response && error.response.status === 401) {
+              this.logout();
+          }
+      }
+  },
+
   async login(email, password) {
     try {
       const response = await api.post('/auth/login', { email, password });
-      this.token = response.data.token;
+      // Laravel style: access_token, user
+      this.token = response.data.access_token;
       this.user = response.data.user;
       localStorage.setItem('token', this.token);
       localStorage.setItem('user', JSON.stringify(this.user));
     } catch (error) {
-      throw error.response?.data?.error ? new Error(error.response.data.error) : error;
+      // Handle Laravel validation errors (422) or Auth errors (401)
+      if (error.response && error.response.data) {
+          const data = error.response.data;
+          if (data.message) {
+             // If there are field-specific errors, maybe join them or just show the main message
+             if (data.errors) {
+                 // For simplicity, returning the main message, or the first error of the first field
+                 const firstField = Object.keys(data.errors)[0];
+                 throw new Error(data.errors[firstField][0]);
+             }
+             throw new Error(data.message);
+          }
+      }
+      throw error;
     }
   },
 
   async register(email, password) {
     try {
       const response = await api.post('/auth/register', { email, password });
-      this.token = response.data.token;
+      this.token = response.data.access_token;
       this.user = response.data.user;
       localStorage.setItem('token', this.token);
       localStorage.setItem('user', JSON.stringify(this.user));
     } catch (error) {
-      throw error.response?.data?.error ? new Error(error.response.data.error) : error;
+      if (error.response && error.response.data) {
+          const data = error.response.data;
+          if (data.message) {
+             if (data.errors) {
+                 const firstField = Object.keys(data.errors)[0];
+                 throw new Error(data.errors[firstField][0]);
+             }
+             throw new Error(data.message);
+          }
+      }
+      throw error;
     }
   },
 
-  logout() {
-    this.token = null;
-    this.user = null;
-    this.transactions = [];
-    this.dashboardData = { overall: {}, monthly: {} };
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+  async logout() {
+    try {
+        await api.post('/auth/logout');
+    } catch (error) {
+        console.error('Logout error', error);
+    } finally {
+        this.token = null;
+        this.user = null;
+        this.transactions = [];
+        this.dashboardData = { overall: {}, monthly: {} };
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+    }
   },
 
   async fetchTransactions() {
