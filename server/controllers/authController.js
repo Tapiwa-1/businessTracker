@@ -21,16 +21,16 @@ export const register = async (req, res) => {
     const { email, password } = req.body;
 
     // Check if user exists
-    const [existingUsers] = await db.execute('SELECT * FROM users WHERE email = ?', [email]);
-    if (existingUsers.length > 0) {
+    const existingUser = await db.get('SELECT * FROM users WHERE email = ?', [email]);
+    if (existingUser) {
       return res.status(400).json({ error: 'User already exists' });
     }
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    const [result] = await db.execute('INSERT INTO users (email, password) VALUES (?, ?)', [email, hashedPassword]);
-    const userId = result.insertId;
+    const result = await db.run('INSERT INTO users (email, password) VALUES (?, ?)', [email, hashedPassword]);
+    const userId = result.lastID;
 
     const token = jwt.sign({ id: userId }, process.env.JWT_SECRET || 'secret', { expiresIn: '1h' });
 
@@ -47,12 +47,11 @@ export const login = async (req, res) => {
 
     const { email, password } = req.body;
 
-    const [users] = await db.execute('SELECT * FROM users WHERE email = ?', [email]);
-    if (users.length === 0) {
+    const user = await db.get('SELECT * FROM users WHERE email = ?', [email]);
+    if (!user) {
       return res.status(400).json({ error: 'Invalid credentials' });
     }
 
-    const user = users[0];
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ error: 'Invalid credentials' });

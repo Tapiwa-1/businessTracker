@@ -13,7 +13,7 @@ const transactionSchema = Joi.object({
 export const getTransactions = async (req, res) => {
   try {
     const userId = req.user.id;
-    const [transactions] = await db.execute('SELECT * FROM transactions WHERE user_id = ? ORDER BY date DESC', [userId]);
+    const transactions = await db.all('SELECT * FROM transactions WHERE user_id = ? ORDER BY date DESC', [userId]);
     res.json(transactions);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -28,12 +28,12 @@ export const addTransaction = async (req, res) => {
     const userId = req.user.id;
     const { type, date, amount, source, name, comments } = req.body;
 
-    const [result] = await db.execute(
+    const result = await db.run(
       'INSERT INTO transactions (user_id, type, date, amount, source, name, comments) VALUES (?, ?, ?, ?, ?, ?, ?)',
       [userId, type, date, amount, source || null, name || null, comments || null]
     );
 
-    res.status(201).json({ id: result.insertId, ...req.body });
+    res.status(201).json({ id: result.lastID, ...req.body });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
