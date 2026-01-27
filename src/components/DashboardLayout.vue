@@ -3,30 +3,41 @@
     <!-- Sidebar -->
     <div :class="sidebarOpen ? 'block' : 'hidden'" @click="sidebarOpen = false" class="fixed inset-0 z-20 transition-opacity bg-black opacity-50 lg:hidden"></div>
 
-    <div :class="sidebarOpen ? 'translate-x-0 ease-out' : '-translate-x-full ease-in'" class="fixed inset-y-0 left-0 z-30 w-64 overflow-y-auto transition duration-300 transform bg-gray-900 lg:translate-x-0 lg:static lg:inset-0">
+    <div :class="sidebarOpen ? 'translate-x-0 ease-out' : '-translate-x-full ease-in'" class="fixed inset-y-0 left-0 z-30 w-64 overflow-y-auto transition duration-300 transform bg-gray-900 lg:translate-x-0 lg:static lg:inset-0 flex flex-col">
       <div class="flex items-center justify-center mt-8">
         <div class="flex items-center">
           <span class="mx-2 text-2xl font-semibold text-white">BusinessTracker</span>
         </div>
       </div>
 
-      <nav class="mt-10">
+      <nav class="mt-10 flex-1">
         <router-link to="/" class="flex items-center px-6 py-2 mt-4 text-gray-500 hover:bg-gray-700 hover:bg-opacity-25 hover:text-gray-100" active-class="text-gray-100 bg-gray-700 bg-opacity-25">
+          <HomeIcon class="w-6 h-6" />
           <span class="mx-3">Dashboard</span>
         </router-link>
 
         <router-link to="/transactions" class="flex items-center px-6 py-2 mt-4 text-gray-500 hover:bg-gray-700 hover:bg-opacity-25 hover:text-gray-100" active-class="text-gray-100 bg-gray-700 bg-opacity-25">
+          <CurrencyDollarIcon class="w-6 h-6" />
           <span class="mx-3">Transactions</span>
         </router-link>
 
         <router-link to="/reports" class="flex items-center px-6 py-2 mt-4 text-gray-500 hover:bg-gray-700 hover:bg-opacity-25 hover:text-gray-100" active-class="text-gray-100 bg-gray-700 bg-opacity-25">
+          <ChartBarIcon class="w-6 h-6" />
           <span class="mx-3">Reports</span>
         </router-link>
-
-        <button @click="logout" class="flex items-center w-full px-6 py-2 mt-4 text-gray-500 hover:bg-gray-700 hover:bg-opacity-25 hover:text-gray-100 focus:outline-none">
-          <span class="mx-3">Logout</span>
-        </button>
       </nav>
+
+      <div class="mt-auto mb-6">
+          <router-link to="/settings" class="flex items-center px-6 py-2 mt-4 text-gray-500 hover:bg-gray-700 hover:bg-opacity-25 hover:text-gray-100" active-class="text-gray-100 bg-gray-700 bg-opacity-25">
+            <Cog6ToothIcon class="w-6 h-6" />
+            <span class="mx-3">Settings</span>
+          </router-link>
+
+          <button @click="logout" class="flex items-center w-full px-6 py-2 mt-4 text-gray-500 hover:bg-gray-700 hover:bg-opacity-25 hover:text-gray-100 focus:outline-none">
+            <ArrowRightOnRectangleIcon class="w-6 h-6" />
+            <span class="mx-3">Logout</span>
+          </button>
+      </div>
     </div>
 
     <!-- Main Content -->
@@ -63,11 +74,12 @@
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { store } from '../store.js';
+import { HomeIcon, CurrencyDollarIcon, ChartBarIcon, Cog6ToothIcon, ArrowRightOnRectangleIcon } from '@heroicons/vue/24/outline';
 
 const sidebarOpen = ref(false);
 const router = useRouter();
 
-const userEmail = computed(() => store.user?.email || 'User');
+const userEmail = computed(() => store.user?.username || store.user?.email || 'User');
 
 const logout = () => {
   store.logout();

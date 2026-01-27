@@ -22,6 +22,8 @@ export const store = reactive({
     overall: { income: 0, expenses: 0, profit: 0 },
     monthly: { income: 0, expenses: 0, profit: 0 },
   },
+  authLoading: false,
+  authErrors: {},
 
   async fetchUser() {
       if (!this.token) return;
@@ -38,50 +40,43 @@ export const store = reactive({
   },
 
   async login(email, password) {
+    this.authLoading = true;
+    this.authErrors = {};
     try {
       const response = await api.post('/auth/login', { email, password });
-      // Laravel style: access_token, user
       this.token = response.data.access_token;
       this.user = response.data.user;
       localStorage.setItem('token', this.token);
       localStorage.setItem('user', JSON.stringify(this.user));
     } catch (error) {
-      // Handle Laravel validation errors (422) or Auth errors (401)
-      if (error.response && error.response.data) {
-          const data = error.response.data;
-          if (data.message) {
-             // If there are field-specific errors, maybe join them or just show the main message
-             if (data.errors) {
-                 // For simplicity, returning the main message, or the first error of the first field
-                 const firstField = Object.keys(data.errors)[0];
-                 throw new Error(data.errors[firstField][0]);
-             }
-             throw new Error(data.message);
-          }
+      if (error.response && error.response.data && error.response.data.errors) {
+        this.authErrors = error.response.data.errors;
+      } else if (error.response && error.response.data && error.response.data.message) {
+         // Fallback for general message not attached to a field, maybe attach to 'email' or general
+         this.authErrors = { general: [error.response.data.message] };
       }
       throw error;
+    } finally {
+      this.authLoading = false;
     }
   },
 
-  async register(email, password) {
+  async register(data) {
+    this.authLoading = true;
+    this.authErrors = {};
     try {
-      const response = await api.post('/auth/register', { email, password });
+      const response = await api.post('/auth/register', data);
       this.token = response.data.access_token;
       this.user = response.data.user;
       localStorage.setItem('token', this.token);
       localStorage.setItem('user', JSON.stringify(this.user));
     } catch (error) {
-      if (error.response && error.response.data) {
-          const data = error.response.data;
-          if (data.message) {
-             if (data.errors) {
-                 const firstField = Object.keys(data.errors)[0];
-                 throw new Error(data.errors[firstField][0]);
-             }
-             throw new Error(data.message);
-          }
+      if (error.response && error.response.data && error.response.data.errors) {
+        this.authErrors = error.response.data.errors;
       }
       throw error;
+    } finally {
+      this.authLoading = false;
     }
   },
 
@@ -98,6 +93,33 @@ export const store = reactive({
         localStorage.removeItem('token');
         localStorage.removeItem('user');
     }
+  },
+
+  async updateProfile(data) {
+      this.authLoading = true;
+      this.authErrors = {};
+      try {
+          const response = await api.put('/auth/user', data);
+          this.user = response.data;
+          localStorage.setItem('user', JSON.stringify(this.user));
+      } catch (error) {
+          if (error.response && error.response.data && error.response.data.errors) {
+              this.authErrors = error.response.data.errors;
+          }
+           throw error;
+      } finally {
+          this.authLoading = false;
+      }
+  },
+
+  async deleteAccount() {
+      try {
+          await api.delete('/auth/user');
+          this.logout();
+      } catch (error) {
+           console.error('Delete account error', error);
+           throw error;
+      }
   },
 
   async fetchTransactions() {

@@ -5,6 +5,7 @@ import Register from '../views/Register.vue';
 import Dashboard from '../views/Dashboard.vue';
 import Transactions from '../views/Transactions.vue';
 import Reports from '../views/Reports.vue';
+import Settings from '../views/Settings.vue';
 
 const routes = [
   { path: '/login', component: Login, meta: { guest: true } },
@@ -12,6 +13,7 @@ const routes = [
   { path: '/', component: Dashboard, meta: { requiresAuth: true } },
   { path: '/transactions', component: Transactions, meta: { requiresAuth: true } },
   { path: '/reports', component: Reports, meta: { requiresAuth: true } },
+  { path: '/settings', component: Settings, meta: { requiresAuth: true } },
 ];
 
 const router = createRouter({

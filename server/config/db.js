@@ -23,6 +23,7 @@ async function initializeDb() {
   await dbInstance.exec(`
     CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
+      username TEXT NOT NULL,
       email TEXT UNIQUE NOT NULL,
       password TEXT NOT NULL,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -46,23 +47,8 @@ async function initializeDb() {
   return dbInstance;
 }
 
-// We need to ensure the DB is initialized before it's used.
-// Since we can't export a promise directly as a db object in the same way as mysql2 pool,
-// we'll export the initialize function and a getter, or just the promise.
-// A common pattern with this library is to await the connection in server.js or just export a wrapper.
-// To minimize refactoring impact on controllers (which import 'db'), let's export a proxy or object that controllers can use.
-// HOWEVER, sqlite library methods are async.
-// Ideally, we start the DB connection at app startup.
-
-// Let's modify the export to be the db promise/instance holder.
-// But controllers expect `import db from ...` and then call `db.execute`.
-// The `sqlite` library uses `db.run`, `db.get`, `db.all`. `db.execute` is not the standard query method (it's for scripts).
-// So we have to refactor controllers anyway.
-
-// Exporting the initializer to be called in server.js
 export { initializeDb };
 
-// Also exporting a holder that will be populated.
 export const db = {
   get: (...args) => dbInstance.get(...args),
   all: (...args) => dbInstance.all(...args),
