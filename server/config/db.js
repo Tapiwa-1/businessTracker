@@ -41,6 +41,21 @@ async function initializeDb() {
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     );
+
+    CREATE TABLE IF NOT EXISTS equipment (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      name TEXT NOT NULL,
+      category TEXT NOT NULL,
+      serial_number TEXT,
+      specs TEXT,
+      price REAL,
+      condition TEXT CHECK(condition IN ('Good', 'Fair', 'Needs Repair', 'Broken')) DEFAULT 'Good',
+      status TEXT CHECK(status IN ('Available', 'Booked', 'Out for hire', 'Under maintenance')) DEFAULT 'Available',
+      image_url TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
   `);
 
   console.log('SQLite database initialized');

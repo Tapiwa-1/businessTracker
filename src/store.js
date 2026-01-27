@@ -18,6 +18,7 @@ export const store = reactive({
   token: localStorage.getItem('token') || null,
   user: JSON.parse(localStorage.getItem('user')) || null,
   transactions: [],
+  equipment: [],
   dashboardData: {
     summary: { income: 0, expenses: 0, profit: 0 },
     chartData: []
@@ -145,6 +146,45 @@ export const store = reactive({
       this.dashboardData = response.data;
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
+    }
+  },
+
+  async fetchEquipment() {
+    try {
+      const response = await api.get('/equipment');
+      this.equipment = response.data;
+    } catch (error) {
+      console.error('Error fetching equipment:', error);
+    }
+  },
+
+  async addEquipment(data) {
+    try {
+      const response = await api.post('/equipment', data);
+      this.equipment.unshift(response.data);
+    } catch (error) {
+      throw error.response?.data?.error ? new Error(error.response.data.error) : error;
+    }
+  },
+
+  async updateEquipment(id, data) {
+    try {
+      const response = await api.put(`/equipment/${id}`, data);
+      const index = this.equipment.findIndex(item => item.id === id);
+      if (index !== -1) {
+        this.equipment[index] = response.data;
+      }
+    } catch (error) {
+      throw error.response?.data?.error ? new Error(error.response.data.error) : error;
+    }
+  },
+
+  async deleteEquipment(id) {
+    try {
+      await api.delete(`/equipment/${id}`);
+      this.equipment = this.equipment.filter(item => item.id !== id);
+    } catch (error) {
+      throw error.response?.data?.error ? new Error(error.response.data.error) : error;
     }
   },
 });

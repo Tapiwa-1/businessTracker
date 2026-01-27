@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import authRoutes from './routes/auth.js';
 import transactionRoutes from './routes/transactions.js';
 import reportRoutes from './routes/reports.js';
+import equipmentRoutes from './routes/equipmentRoutes.js';
 import { initializeDb } from './config/db.js';
 
 dotenv.config();
@@ -17,6 +18,7 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/reports', reportRoutes);
+app.use('/api/equipment', equipmentRoutes);
 
 initializeDb().then(() => {
   app.listen(PORT, () => {

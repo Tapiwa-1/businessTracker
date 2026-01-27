@@ -94,7 +94,7 @@ async function seed() {
       }
     }
 
-    // Insert all
+    // Insert all transactions
     const stmt = await db.prepare('INSERT INTO transactions (user_id, type, date, amount, source, name, comments) VALUES (?, ?, ?, ?, ?, ?, ?)');
 
     for (const t of transactions) {
@@ -103,6 +103,43 @@ async function seed() {
     await stmt.finalize();
 
     console.log(`Inserted ${transactions.length} dummy transactions.`);
+
+
+    // --- Seed Equipment ---
+    // Clear existing equipment for this user
+    await db.run('DELETE FROM equipment WHERE user_id = ?', [user.id]);
+    console.log('Cleared existing equipment.');
+
+    const equipmentList = [
+      { name: 'JBL SRX 815', category: 'Speaker', serial_number: 'JBL-SRX-001', specs: '2000W Active', price: 1400.00, condition: 'Good', status: 'Available' },
+      { name: 'JBL SRX 815', category: 'Speaker', serial_number: 'JBL-SRX-002', specs: '2000W Active', price: 1400.00, condition: 'Good', status: 'Available' },
+      { name: 'Shure SM58', category: 'Mic', serial_number: 'SH-SM58-101', specs: 'Dynamic Vocal Mic', price: 99.00, condition: 'Good', status: 'Available' },
+      { name: 'Shure SM58', category: 'Mic', serial_number: 'SH-SM58-102', specs: 'Dynamic Vocal Mic', price: 99.00, condition: 'Fair', status: 'Out for hire' },
+      { name: 'Behringer X32', category: 'Mixer', serial_number: 'BEH-X32-555', specs: '32-Channel Digital Mixer', price: 2500.00, condition: 'Good', status: 'Available' },
+      { name: 'QSC K12.2', category: 'Speaker', serial_number: 'QSC-K12-777', specs: '2000W Active', price: 900.00, condition: 'Needs Repair', status: 'Under maintenance' },
+      { name: 'XLR Cable 20ft', category: 'Cable', serial_number: '', specs: '20ft Balanced', price: 25.00, condition: 'Good', status: 'Available' },
+      { name: 'XLR Cable 20ft', category: 'Cable', serial_number: '', specs: '20ft Balanced', price: 25.00, condition: 'Good', status: 'Available' },
+    ];
+
+    const equipStmt = await db.prepare(
+      'INSERT INTO equipment (user_id, name, category, serial_number, specs, price, condition, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+    );
+
+    for (const item of equipmentList) {
+      await equipStmt.run([
+        user.id,
+        item.name,
+        item.category,
+        item.serial_number,
+        item.specs,
+        item.price,
+        item.condition,
+        item.status
+      ]);
+    }
+    await equipStmt.finalize();
+    console.log(`Inserted ${equipmentList.length} dummy equipment items.`);
+
     console.log('Seeding complete.');
 
   } catch (error) {

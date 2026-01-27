@@ -25,6 +25,11 @@
           <ChartBarIcon class="w-6 h-6" />
           <span class="mx-3">Reports</span>
         </router-link>
+
+        <router-link to="/inventory" class="flex items-center px-6 py-2 mt-4 text-gray-500 hover:bg-gray-700 hover:bg-opacity-25 hover:text-gray-100" active-class="text-gray-100 bg-gray-700 bg-opacity-25">
+          <CubeIcon class="w-6 h-6" />
+          <span class="mx-3">Inventory</span>
+        </router-link>
       </nav>
 
       <div class="mt-auto mb-6">
@@ -74,7 +79,7 @@
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { store } from '../store.js';
-import { HomeIcon, CurrencyDollarIcon, ChartBarIcon, Cog6ToothIcon, ArrowRightOnRectangleIcon } from '@heroicons/vue/24/outline';
+import { HomeIcon, CurrencyDollarIcon, ChartBarIcon, Cog6ToothIcon, ArrowRightOnRectangleIcon, CubeIcon } from '@heroicons/vue/24/outline';
 
 const sidebarOpen = ref(false);
 const router = useRouter();

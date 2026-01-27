@@ -6,6 +6,7 @@ import Dashboard from '../views/Dashboard.vue';
 import Transactions from '../views/Transactions.vue';
 import Reports from '../views/Reports.vue';
 import Settings from '../views/Settings.vue';
+import Inventory from '../views/Inventory.vue';
 
 const routes = [
   { path: '/login', component: Login, meta: { guest: true } },
@@ -13,6 +14,7 @@ const routes = [
   { path: '/', component: Dashboard, meta: { requiresAuth: true } },
   { path: '/transactions', component: Transactions, meta: { requiresAuth: true } },
   { path: '/reports', component: Reports, meta: { requiresAuth: true } },
+  { path: '/inventory', component: Inventory, meta: { requiresAuth: true } },
   { path: '/settings', component: Settings, meta: { requiresAuth: true } },
 ];
 
