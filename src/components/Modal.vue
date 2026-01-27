@@ -1,5 +1,5 @@
 <template>
-  <div v-if="isOpen" class="fixed inset-0 z-50 flex items-center justify-center overflow-auto bg-black bg-opacity-50">
+  <div v-if="isOpen" class="fixed inset-0 z-50 flex items-center justify-center overflow-auto bg-black bg-opacity-50 backdrop-blur-sm">
     <div class="relative w-full max-w-md p-6 bg-white rounded-lg shadow-lg">
       <div class="flex justify-between items-center mb-4">
         <h3 class="text-lg font-semibold">{{ title }}</h3>
