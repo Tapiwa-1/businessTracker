@@ -19,6 +19,7 @@ export const store = reactive({
   user: JSON.parse(localStorage.getItem('user')) || null,
   transactions: [],
   equipment: [],
+  bookings: [],
   dashboardData: {
     summary: { income: 0, expenses: 0, profit: 0 },
     chartData: []
@@ -183,6 +184,45 @@ export const store = reactive({
     try {
       await api.delete(`/equipment/${id}`);
       this.equipment = this.equipment.filter(item => item.id !== id);
+    } catch (error) {
+      throw error.response?.data?.error ? new Error(error.response.data.error) : error;
+    }
+  },
+
+  async fetchBookings() {
+    try {
+      const response = await api.get('/bookings');
+      this.bookings = response.data;
+    } catch (error) {
+      console.error('Error fetching bookings:', error);
+    }
+  },
+
+  async addBooking(data) {
+    try {
+      const response = await api.post('/bookings', data);
+      this.bookings.push(response.data);
+    } catch (error) {
+      throw error.response?.data?.error ? new Error(error.response.data.error) : error;
+    }
+  },
+
+  async updateBooking(id, data) {
+    try {
+      const response = await api.put(`/bookings/${id}`, data);
+      const index = this.bookings.findIndex(item => item.id === id);
+      if (index !== -1) {
+        this.bookings[index] = response.data;
+      }
+    } catch (error) {
+      throw error.response?.data?.error ? new Error(error.response.data.error) : error;
+    }
+  },
+
+  async deleteBooking(id) {
+    try {
+      await api.delete(`/bookings/${id}`);
+      this.bookings = this.bookings.filter(item => item.id !== id);
     } catch (error) {
       throw error.response?.data?.error ? new Error(error.response.data.error) : error;
     }

@@ -100,7 +100,9 @@ onMounted(() => {
 const bookings = computed(() => store.bookings);
 
 const calendarAttributes = computed(() => {
-    return bookings.value.map(b => {
+    // Ensure bookings.value is an array before mapping
+    const bookingList = Array.isArray(bookings.value) ? bookings.value : [];
+    return bookingList.map(b => {
         let color = 'blue';
         if (b.status === 'Confirmed') color = 'green';
         if (b.status === 'Cancelled') color = 'red';

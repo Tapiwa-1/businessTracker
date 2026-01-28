@@ -21,6 +21,11 @@
           <span class="mx-3">Transactions</span>
         </router-link>
 
+        <router-link to="/bookings" class="flex items-center px-6 py-2 mt-4 text-gray-500 hover:bg-gray-700 hover:bg-opacity-25 hover:text-gray-100" active-class="text-gray-100 bg-gray-700 bg-opacity-25">
+          <CalendarIcon class="w-6 h-6" />
+          <span class="mx-3">Bookings</span>
+        </router-link>
+
         <router-link to="/reports" class="flex items-center px-6 py-2 mt-4 text-gray-500 hover:bg-gray-700 hover:bg-opacity-25 hover:text-gray-100" active-class="text-gray-100 bg-gray-700 bg-opacity-25">
           <ChartBarIcon class="w-6 h-6" />
           <span class="mx-3">Reports</span>
@@ -79,7 +84,7 @@
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { store } from '../store.js';
-import { HomeIcon, CurrencyDollarIcon, ChartBarIcon, Cog6ToothIcon, ArrowRightOnRectangleIcon, CubeIcon } from '@heroicons/vue/24/outline';
+import { HomeIcon, CurrencyDollarIcon, ChartBarIcon, Cog6ToothIcon, ArrowRightOnRectangleIcon, CubeIcon, CalendarIcon } from '@heroicons/vue/24/outline';
 
 const sidebarOpen = ref(false);
 const router = useRouter();

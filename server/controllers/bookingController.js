@@ -13,6 +13,11 @@ const bookingSchema = Joi.object({
     equipment_ids: Joi.array().items(Joi.number()).default([])
 });
 
+// Helper to ensure date strings are used for SQLite comparisons
+const toIsoString = (dateInput) => {
+    return new Date(dateInput).toISOString();
+};
+
 export const getBookings = async (req, res) => {
     try {
         const bookings = await db.all('SELECT * FROM bookings WHERE user_id = ? ORDER BY start_time ASC', [req.user.id]);
@@ -45,6 +50,9 @@ export const createBooking = async (req, res) => {
         const { error, value } = bookingSchema.validate(req.body);
         if (error) return res.status(400).json({ error: error.details[0].message });
 
+        const startTimeIso = toIsoString(value.start_time);
+        const endTimeIso = toIsoString(value.end_time);
+
         // Conflict Detection: Check if assigned equipment is already booked in this timeframe
         if (value.equipment_ids && value.equipment_ids.length > 0) {
              const placeholders = value.equipment_ids.map(() => '?').join(',');
@@ -61,7 +69,7 @@ export const createBooking = async (req, res) => {
                     (b.start_time <= ? AND b.end_time >= ?) OR
                     (b.start_time >= ? AND b.end_time <= ?)
                 )
-             `, [...value.equipment_ids, value.end_time, value.start_time, value.start_time, value.start_time, value.start_time, value.end_time]);
+             `, [...value.equipment_ids, endTimeIso, startTimeIso, startTimeIso, startTimeIso, startTimeIso, endTimeIso]);
 
              if (conflicts.length > 0) {
                  const conflictMsg = conflicts.map(c => `${c.equipment_name} is booked by ${c.client_name}`).join(', ');
@@ -72,13 +80,12 @@ export const createBooking = async (req, res) => {
         const result = await db.run(
             `INSERT INTO bookings (user_id, client_name, client_phone, event_type, start_time, end_time, location, status, notes)
              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [req.user.id, value.client_name, value.client_phone, value.event_type, value.start_time, value.end_time, value.location, value.status, value.notes]
+            [req.user.id, value.client_name, value.client_phone, value.event_type, startTimeIso, endTimeIso, value.location, value.status, value.notes]
         );
 
         const bookingId = result.lastID;
 
         if (value.equipment_ids && value.equipment_ids.length > 0) {
-            // Using loop with run since db.prepare wrapper might be missing in our db abstraction
             for (const equipId of value.equipment_ids) {
                 await db.run('INSERT INTO booking_equipment (booking_id, equipment_id) VALUES (?, ?)', [bookingId, equipId]);
             }
@@ -105,6 +112,9 @@ export const updateBooking = async (req, res) => {
         const booking = await db.get('SELECT * FROM bookings WHERE id = ? AND user_id = ?', [req.params.id, req.user.id]);
         if (!booking) return res.status(404).json({ error: 'Booking not found' });
 
+        const startTimeIso = toIsoString(value.start_time);
+        const endTimeIso = toIsoString(value.end_time);
+
          // Conflict Detection (Excluding self)
          if (value.equipment_ids && value.equipment_ids.length > 0) {
             const placeholders = value.equipment_ids.map(() => '?').join(',');
@@ -122,7 +132,7 @@ export const updateBooking = async (req, res) => {
                    (b.start_time <= ? AND b.end_time >= ?) OR
                    (b.start_time >= ? AND b.end_time <= ?)
                )
-            `, [...value.equipment_ids, req.params.id, value.end_time, value.start_time, value.start_time, value.start_time, value.start_time, value.end_time]);
+            `, [...value.equipment_ids, req.params.id, endTimeIso, startTimeIso, startTimeIso, startTimeIso, startTimeIso, endTimeIso]);
 
             if (conflicts.length > 0) {
                 const conflictMsg = conflicts.map(c => `${c.equipment_name} is booked by ${c.client_name}`).join(', ');
@@ -133,7 +143,7 @@ export const updateBooking = async (req, res) => {
         await db.run(
             `UPDATE bookings SET client_name = ?, client_phone = ?, event_type = ?, start_time = ?, end_time = ?, location = ?, status = ?, notes = ?
              WHERE id = ?`,
-            [value.client_name, value.client_phone, value.event_type, value.start_time, value.end_time, value.location, value.status, value.notes, req.params.id]
+            [value.client_name, value.client_phone, value.event_type, startTimeIso, endTimeIso, value.location, value.status, value.notes, req.params.id]
         );
 
         // Update Equipment
