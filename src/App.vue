@@ -3,5 +3,10 @@
 </template>
 
 <script setup>
-// Main App entry point
+import { onMounted } from 'vue';
+import { store } from './store';
+
+onMounted(() => {
+  store.applyTheme();
+});
 </script>

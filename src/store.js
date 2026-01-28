@@ -17,6 +17,7 @@ api.interceptors.request.use(config => {
 export const store = reactive({
   token: localStorage.getItem('token') || null,
   user: JSON.parse(localStorage.getItem('user')) || null,
+  theme: localStorage.getItem('theme') || 'light',
   transactions: [],
   equipment: [],
   bookings: [],
@@ -26,6 +27,20 @@ export const store = reactive({
   },
   authLoading: false,
   authErrors: {},
+
+  toggleTheme() {
+    this.theme = this.theme === 'light' ? 'dark' : 'light';
+    localStorage.setItem('theme', this.theme);
+    this.applyTheme();
+  },
+
+  applyTheme() {
+    if (this.theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  },
 
   async fetchUser() {
       if (!this.token) return;
